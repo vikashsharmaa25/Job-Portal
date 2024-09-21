@@ -1,10 +1,8 @@
-import React from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Button } from "../ui/button";
-import { Avatar, AvatarImage } from "../ui/avatar";
-import { LogOut, User2 } from "lucide-react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { Menu, Dropdown, Avatar, Button } from "antd";
+import { UserOutlined, LogoutOutlined, MenuOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { USER_API_END_POINT } from "@/utils/constant";
 import { setUser } from "@/redux/authSlice";
@@ -14,6 +12,7 @@ const Navbar = () => {
   const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const logoutHandler = async () => {
     try {
@@ -26,105 +25,228 @@ const Navbar = () => {
         toast.success(res.data.message);
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.response.data.message);
     }
   };
+
+  const menu = (
+    <Menu className="bg-gray-800 text-white">
+      {user && user.role === "student" && (
+        <Menu.Item key="profile" icon={<UserOutlined />}>
+          <Link to="/profile">View Profile</Link>
+        </Menu.Item>
+      )}
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={logoutHandler}>
+        Logout
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
-    <div className="bg-white">
-      <div className="flex items-center justify-between mx-auto max-w-7xl h-16">
-        <div>
-          <h1 className="text-2xl font-bold">
-            Job<span className="text-[#F83002]">Portal</span>
-          </h1>
+    <nav className="bg-gradient-to-r from-gray-700 via-gray-900 to-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <h1 className="text-2xl md:text-3xl font-bold text-white tracking-widest">
+                Job<span className="text-[#F83002]">Portal</span>
+              </h1>
+            </div>
+          </div>
+          <div className="hidden md:block">
+            <div className="flex items-baseline space-x-4">
+              {user && user.role === "recruiter" ? (
+                <>
+                  <Link
+                    to="/admin/companies"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Companies
+                  </Link>
+                  <Link
+                    to="/admin/jobs"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Jobs
+                  </Link>
+                  <Link
+                    to="/browse"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Contact us
+                  </Link>
+                  <Link
+                    to="/browse"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    About us
+                  </Link>
+                  <Link
+                    to="/browse"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Portfolio
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    to="/jobs"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Jobs
+                  </Link>
+                  <Link
+                    to="/browse"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Contact us
+                  </Link>
+                  <Link
+                    to="/browse"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    About us
+                  </Link>
+                  <Link
+                    to="/browse"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Portfolio
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="hidden md:block">
+            {!user ? (
+              <div className="ml-4 flex items-center md:ml-6">
+                <Link to="/login">
+                  <Button
+                    type="link"
+                    className="text-gray-300 hover:text-white"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button
+                    type="primary"
+                    className="ml-3 bg-[#F83002] border-[#F83002] hover:bg-[#D62A02] hover:border-[#D62A02]"
+                  >
+                    Signup
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <Dropdown overlay={menu} placement="bottomRight" arrow>
+                <Avatar
+                  src={user?.profile?.profilePhoto}
+                  icon={<UserOutlined />}
+                  className="cursor-pointer bg-gray-300"
+                />
+              </Dropdown>
+            )}
+          </div>
+          <div className="md:hidden">
+            <Button
+              type="text"
+              icon={<MenuOutlined className="text-white text-2xl" />}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            />
+          </div>
         </div>
-        <div className="flex items-center gap-12">
-          <ul className="flex font-medium items-center gap-5">
+      </div>
+
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {user && user.role === "recruiter" ? (
               <>
-                <li>
-                  <Link to="/admin/companies">Companies</Link>
-                </li>
-                <li>
-                  <Link to="/admin/jobs">Jobs</Link>
-                </li>
+                <Link
+                  to="/admin/companies"
+                  className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Companies
+                </Link>
+                <Link
+                  to="/admin/jobs"
+                  className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Jobs
+                </Link>
               </>
             ) : (
               <>
-                <li>
-                  <Link to="/">Home</Link>
-                </li>
-                <li>
-                  <Link to="/jobs">Jobs</Link>
-                </li>
-                <li>
-                  <Link to="/browse">Browse</Link>
-                </li>
+                <Link
+                  to="/"
+                  className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/jobs"
+                  className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Jobs
+                </Link>
+                <Link
+                  to="/browse"
+                  className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Browse
+                </Link>
               </>
             )}
-          </ul>
-          {!user ? (
-            <div className="flex items-center gap-2">
-              <Link to="/login">
-                <Button variant="outline">Login</Button>
-              </Link>
-              <Link to="/signup">
-                <Button className="bg-[#6A38C2] hover:bg-[#5b30a6]">
-                  Signup
+            {!user ? (
+              <div className="mt-3 space-y-2">
+                <Link to="/login">
+                  <Button
+                    type="link"
+                    className="w-full text-left text-gray-300 hover:text-white"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button
+                    type="primary"
+                    className="w-full bg-[#F83002] border-[#F83002] hover:bg-[#D62A02] hover:border-[#D62A02]"
+                  >
+                    Signup
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-3 space-y-2">
+                {user.role === "student" && (
+                  <Link
+                    to="/profile"
+                    className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                  >
+                    View Profile
+                  </Link>
+                )}
+                <Button
+                  type="link"
+                  className="w-full text-left text-gray-300 hover:text-white"
+                  onClick={logoutHandler}
+                >
+                  Logout
                 </Button>
-              </Link>
-            </div>
-          ) : (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Avatar className="cursor-pointer">
-                  <AvatarImage
-                    src={user?.profile?.profilePhoto}
-                    alt="@shadcn"
-                  />
-                </Avatar>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="">
-                  <div className="flex gap-2 space-y-2">
-                    <Avatar className="cursor-pointer">
-                      <AvatarImage
-                        src={user?.profile?.profilePhoto}
-                        alt="@shadcn"
-                      />
-                    </Avatar>
-                    <div>
-                      <h4 className="font-medium">{user?.fullname}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {user?.profile?.bio}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col my-2 text-gray-600">
-                    {user && user.role === "student" && (
-                      <div className="flex w-fit items-center gap-2 cursor-pointer">
-                        <User2 />
-                        <Button variant="link">
-                          {" "}
-                          <Link to="/profile">View Profile</Link>
-                        </Button>
-                      </div>
-                    )}
-
-                    <div className="flex w-fit items-center gap-2 cursor-pointer">
-                      <LogOut />
-                      <Button onClick={logoutHandler} variant="link">
-                        Logout
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </nav>
   );
 };
 
